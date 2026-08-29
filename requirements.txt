@@ -3,7 +3,7 @@ streamlit-mic-recorder
 openai-whisper
 torch
 scikit-learn==1.6.1
-numpy<2.0
+numpy==1.26.4
 pandas
 nltk
 joblib
