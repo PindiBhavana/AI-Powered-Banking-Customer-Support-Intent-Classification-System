@@ -7,6 +7,9 @@ import whisper
 import nltk
 import soundfile as sf
 import scipy.signal
+import cv2
+import mediapipe as mp
+import torch
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
