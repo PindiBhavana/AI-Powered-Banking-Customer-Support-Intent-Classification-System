@@ -8,14 +8,29 @@ import whisper
 import nltk
 import soundfile as sf
 import scipy.signal
-import cv2
-import mediapipe as mp
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from streamlit_mic_recorder import mic_recorder
 
+
+# ============================================================
+# OPTIONAL COMPUTER VISION
+# ============================================================
+
+MEDIAPIPE_AVAILABLE = False
+mp = None
+cv2 = None
+
+try:
+    import cv2
+    import mediapipe as mp
+
+    MEDIAPIPE_AVAILABLE = True
+
+except Exception:
+    MEDIAPIPE_AVAILABLE = False
 
 # ============================================================
 # PAGE CONFIGURATION
@@ -803,38 +818,155 @@ st.markdown(
 # MEDIAPIPE HAND DETECTION
 # ============================================================
 
+
 st.markdown("---")
 
-st.header(
-    "✋ MediaPipe – Gesture Detection"
-)
+st.header("✋ MediaPipe – Gesture Detection")
 
-st.markdown(
-    """
-    <div class="gesture-box">
+if not MEDIAPIPE_AVAILABLE:
 
-        <h3>
-            📷 Interactive Computer Vision Feature
-        </h3>
+    st.warning(
+        "✋ Hand detection is currently unavailable in this "
+        "Streamlit environment."
+    )
 
-        <p>
-            Capture an image using your webcam.
-            OpenCV processes the image and MediaPipe
-            detects human hand landmarks.
-        </p>
+    st.info(
+        "The main Voice2Resolve Speech-to-Text and "
+        "Banking Intent Classification features remain available."
+    )
 
-        <p>
-            This feature can be extended for
-            hand gesture recognition, application
-            control and interactive navigation.
-        </p>
+elif not os.path.exists(HAND_MODEL_PATH):
 
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    st.warning(
+        "⚠️ hand_landmarker.task was not found."
+    )
 
+    st.info(
+        "Place hand_landmarker.task in the same GitHub "
+        "folder as app.py."
+    )
 
+else:
+
+    st.write(
+        "Capture an image using your webcam "
+        "to detect hand landmarks."
+    )
+
+    image_file = st.camera_input(
+        "📷 Capture Hand Image"
+    )
+
+    if image_file is not None:
+
+        try:
+
+            image_array = np.frombuffer(
+                image_file.getvalue(),
+                np.uint8
+            )
+
+            image = cv2.imdecode(
+                image_array,
+                cv2.IMREAD_COLOR
+            )
+
+            if image is None:
+
+                st.error(
+                    "Unable to read the camera image."
+                )
+
+            else:
+
+                rgb = cv2.cvtColor(
+                    image,
+                    cv2.COLOR_BGR2RGB
+                )
+
+                mp_image = mp.Image(
+                    image_format=mp.ImageFormat.SRGB,
+                    data=rgb
+                )
+
+                options = (
+                    mp.tasks.vision.HandLandmarkerOptions(
+                        base_options=mp.tasks.BaseOptions(
+                            model_asset_path=HAND_MODEL_PATH
+                        ),
+                        running_mode=(
+                            mp.tasks.vision.RunningMode.IMAGE
+                        ),
+                        num_hands=2,
+                        min_hand_detection_confidence=0.5,
+                        min_hand_presence_confidence=0.5,
+                        min_tracking_confidence=0.5
+                    )
+                )
+
+                with (
+                    mp.tasks.vision.HandLandmarker
+                    .create_from_options(options)
+                    as detector
+                ):
+
+                    result = detector.detect(
+                        mp_image
+                    )
+
+                if result.hand_landmarks:
+
+                    st.success(
+                        f"✋ {len(result.hand_landmarks)} "
+                        "hand(s) detected!"
+                    )
+
+                    annotated = rgb.copy()
+
+                    height, width, _ = annotated.shape
+
+                    for hand_landmarks in result.hand_landmarks:
+
+                        for landmark in hand_landmarks:
+
+                            x = int(
+                                landmark.x * width
+                            )
+
+                            y = int(
+                                landmark.y * height
+                            )
+
+                            cv2.circle(
+                                annotated,
+                                (x, y),
+                                6,
+                                (255, 255, 0),
+                                -1
+                            )
+
+                    st.image(
+                        annotated,
+                        caption="✋ Detected Hand Landmarks",
+                        use_container_width=True
+                    )
+
+                else:
+
+                    st.info(
+                        "🖐️ No hand detected. "
+                        "Place your hand clearly in the camera."
+                    )
+
+        except Exception as e:
+
+            st.error(
+                "Hand detection could not be initialized."
+            )
+
+            st.info(
+                "Your main Voice2Resolve features are still available."
+            )
 # ============================================================
 # CHECK HAND MODEL
 # ============================================================
