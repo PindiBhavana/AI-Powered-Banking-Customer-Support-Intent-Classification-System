@@ -15,6 +15,8 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 from streamlit_mic_recorder import mic_recorder
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 
 try:
     import mediapipe as mp
