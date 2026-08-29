@@ -1,3 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # Web Framework & Audio Input
 streamlit
 streamlit-mic-recorder
