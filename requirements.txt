@@ -2,12 +2,12 @@ streamlit
 streamlit-mic-recorder
 openai-whisper
 torch
-scikit-learn
-numpy
+scikit-learn==1.6.1
+numpy<2.0
 pandas
 nltk
 joblib
 soundfile
 scipy
 opencv-python-headless
-mediapipe
+mediapipe==0.10.21
