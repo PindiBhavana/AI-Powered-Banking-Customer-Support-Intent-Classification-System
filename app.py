@@ -128,7 +128,7 @@ if audio and audio.get("bytes"):
             st.exception(e)
 
 st.markdown("---")
-st.header("✋ Optional MediaPipe Hand Detection")
+st.header("✋ MediaPipe Hand Detection")
 if not MEDIAPIPE_AVAILABLE:
     st.info("MediaPipe/OpenCV is not available. Install requirements.txt.")
 else:
