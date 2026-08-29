@@ -7,6 +7,8 @@ import whisper
 import nltk
 import soundfile as sf
 import scipy.signal
+import mediapipe
+import cv2
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
