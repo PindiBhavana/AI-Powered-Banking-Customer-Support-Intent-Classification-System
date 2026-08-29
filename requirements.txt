@@ -11,3 +11,5 @@ soundfile
 scipy
 opencv-python-headless==4.11.0.86
 mediapipe==0.10.21
+mediapipe
+opencv-python
