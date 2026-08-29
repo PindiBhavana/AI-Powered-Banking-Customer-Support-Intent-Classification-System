@@ -1,4 +1,3 @@
-```python
 import io
 import re
 import joblib
@@ -416,4 +415,3 @@ st.caption(
     "Voice2Resolve | Banking77 | Whisper + TF-IDF + "
     "Tuned Logistic Regression + Streamlit"
 )
-```
