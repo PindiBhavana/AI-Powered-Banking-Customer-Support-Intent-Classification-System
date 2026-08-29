@@ -8,7 +8,6 @@ import nltk
 import soundfile as sf
 import scipy.signal
 import cv2
-import mediapipe as mp
 import torch
 
 from nltk.corpus import stopwords
@@ -146,8 +145,7 @@ else:
             image_array = np.frombuffer(image_file.getvalue(), np.uint8)
             image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
-
+           
             options = mp.tasks.vision.HandLandmarkerOptions(
                 base_options=mp.tasks.BaseOptions(model_asset_path=HAND_MODEL_PATH),
                 running_mode=mp.tasks.vision.RunningMode.IMAGE,
