@@ -139,8 +139,8 @@ with tab1:
                 st.exception(e)
 
 with tab2:
-    st.header("Webcam -> OpenCV -> MediaPipe")
-    st.write("Use this module for hand gesture recognition, application control, and interactive features.")
+    st.header("📷 Gesture Confirmation")
+    st.write("Use a hand gesture to confirm or reject the predicted developer intent.")
     
     if not MEDIAPIPE_AVAILABLE:
         st.error("MediaPipe/OpenCV not found. Please install requirements.")
@@ -149,7 +149,7 @@ with tab2:
             with open(HAND_MODEL_PATH, "rb"):
                 pass
             
-            image_file = st.camera_input("📷 Capture Hand Image for Navigation Control")
+            image_file = st.camera_input("Show your hand gesture")
             
             if image_file is not None:
                 # OpenCV Processing
