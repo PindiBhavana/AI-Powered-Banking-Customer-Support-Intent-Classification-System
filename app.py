@@ -193,6 +193,9 @@ with tab2:
                         )
                     
                     st.image(cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB), caption="Interactive Navigation Visualized")
+
+                    st.header("✋ Detected Gesture")
+                    st.write("👍 Thumbs Up")
                     
                     # Simulated Application Control based on detection
                     if num_hands == 1:
