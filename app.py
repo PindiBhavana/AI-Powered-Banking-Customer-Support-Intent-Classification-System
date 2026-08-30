@@ -90,53 +90,71 @@ def predict_intent(text):
         confidence = float(model.predict_proba(vector)[0].max() * 100)
     return prediction, confidence, cleaned
 
+# --- HELPER FUNCTION FOR UI ---
+def process_and_display_intent(recognized_text):
+    """Handles the prediction and UI display for both text and voice inputs."""
+    st.subheader("Step 2: Input Text")
+    st.info(recognized_text)
+    
+    with st.spinner("Processing text and predicting intent..."):
+        prediction, confidence, cleaned_text = predict_intent(recognized_text)
+    
+    if prediction is None:
+        st.warning("No usable text available after preprocessing.")
+    else:
+        st.subheader("Step 3: Prediction & Confidence")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.success(f"**Intent:** {prediction}")
+        with col2:
+            st.metric("Confidence Score", f"{confidence:.2f}%" if confidence else "N/A")
+        
+        with st.expander("View Text Preprocessing Output"):
+            st.write(f"**Cleaned & Lemmatized:** {cleaned_text}")
 
 # --- STREAMLIT UI & WORKFLOW ROUTING ---
-tab1, tab2 = st.tabs(["🎤 Voice Workflow (Intent Prediction)", "✋ Vision Workflow (Gesture Control)"])
+tab1, tab2 = st.tabs(["🎤/⌨️ Voice & Text Workflow", "✋ Vision Workflow (Gesture Control)"])
 
 with tab1:
-    st.header("Step 1: User Speech")
-    st.write("Record your banking query to trigger the real-time prediction pipeline.")
+    st.header("Step 1: User Input")
     
-    audio = mic_recorder(
-        start_prompt="🎤 Start Recording",
-        stop_prompt="⏹️ Stop Recording",
-        just_once=False,
-        format="wav",
-        key="banking_recorder"
-    )
+    # Toggle between Voice and Text input
+    input_mode = st.radio("Choose input method:", ["Voice Command 🎤", "Text Command ⌨️"], horizontal=True)
+    
+    if input_mode == "Voice Command 🎤":
+        st.write("Record your banking query to trigger the real-time prediction pipeline.")
+        audio = mic_recorder(
+            start_prompt="🎤 Start Recording",
+            stop_prompt="⏹️ Stop Recording",
+            just_once=False,
+            format="wav",
+            key="banking_recorder"
+        )
 
-    if audio and audio.get("bytes"):
-        st.audio(audio["bytes"], format="audio/wav")
-        if st.button("🔎 Execute NLP Pipeline", type="primary"):
-            try:
-                # Speech-to-Text -> Generated Text
-                with st.spinner("Converting speech to text..."):
-                    recognized_text = transcribe_audio(audio["bytes"])
-                
-                st.subheader("Step 2: Generated Text")
-                st.info(recognized_text)
-                
-                # Text Preprocessing -> Vectorization -> Best Model -> Prediction
-                with st.spinner("Processing text and predicting intent..."):
-                    prediction, confidence, cleaned_text = predict_intent(recognized_text)
-                
-                if prediction is None:
-                    st.warning("No usable text available after preprocessing.")
-                else:
-                    st.subheader("Step 3: Prediction & Confidence")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.success(f"**Intent:** {prediction}")
-                    with col2:
-                        st.metric("Confidence Score", f"{confidence:.2f}%" if confidence else "N/A")
+        if audio and audio.get("bytes"):
+            st.audio(audio["bytes"], format="audio/wav")
+            if st.button("🔎 Execute NLP Pipeline", type="primary"):
+                try:
+                    with st.spinner("Converting speech to text..."):
+                        recognized_text = transcribe_audio(audio["bytes"])
+                    process_and_display_intent(recognized_text)
+                except Exception as e:
+                    st.error("Pipeline failed during audio execution.")
+                    st.exception(e)
                     
-                    with st.expander("View Text Preprocessing Output"):
-                        st.write(f"**Cleaned & Lemmatized:** {cleaned_text}")
-
-            except Exception as e:
-                st.error("Pipeline failed during execution.")
-                st.exception(e)
+    elif input_mode == "Text Command ⌨️":
+        st.write("Type your banking query to trigger the real-time prediction pipeline.")
+        text_input = st.text_input("Enter command:", placeholder="e.g., I need to reset my banking password")
+        
+        if st.button("🔎 Execute NLP Pipeline", type="primary"):
+            if text_input.strip():
+                try:
+                    process_and_display_intent(text_input)
+                except Exception as e:
+                    st.error("Pipeline failed during text execution.")
+                    st.exception(e)
+            else:
+                st.warning("Please enter a command before executing.")
 
 with tab2:
     st.header("📷 Gesture Confirmation")
